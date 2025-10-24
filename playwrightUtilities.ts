@@ -1,33 +1,25 @@
-import { Browser, chromium, Page } from 'playwright';
+// playwrightUtilities.ts
+import { chromium, Browser, BrowserContext, Page } from 'playwright';
 
 let browser: Browser | null = null;
+let context: BrowserContext | null = null;
 let page: Page | null = null;
-const DEFAULT_TIMEOUT = 30000;
 
-export const initializeBrowser = async () => {
-  if (!browser) {
-    browser = await chromium.launch({ headless: false });
-  }
-};
+export async function initializePage(headless = true) {
+  browser = await chromium.launch({ headless, args: ['--disable-dev-shm-usage'] });
+  context = await browser.newContext();
+  page = await context.newPage();
+}
 
-export const initializePage = async () => {
-  if (browser && !page) {
-    page = await browser.newPage();
-    page.setDefaultTimeout(DEFAULT_TIMEOUT);
-  }
-};
-
-export const getPage = (): Page => {
-  if (!page) {
-    throw new Error('Page has not been initialized. Please call initializePage first.');
-  }
+export function getPage(): Page {
+  if (!page) throw new Error('Page has not been initialized. Please call initializePage first.');
   return page;
-};
+}
 
-export const closeBrowser = async () => {
-  if (browser) {
-    await browser.close();
-    browser = null;
-    page = null;
-  }
-};
+export async function cleanup() {
+  await context?.close();
+  await browser?.close();
+  page = null;
+  context = null;
+  browser = null;
+}

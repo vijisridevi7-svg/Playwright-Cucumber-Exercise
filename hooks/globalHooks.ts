@@ -1,13 +1,11 @@
-import { After, Before, setDefaultTimeout } from "@cucumber/cucumber";
-import { closeBrowser, initializeBrowser, initializePage } from "../playwrightUtilities";
+import { Before, After } from '@cucumber/cucumber';
+import { initializePage, cleanup } from '../playwrightUtilities';
 
-setDefaultTimeout(15000);
+Before(async function () {
+  // toggle HEADLESS=false by running: HEADLESS=false npm run test
+  await initializePage(process.env.HEADLESS !== 'false');
+});
 
-Before( async () => {
-    await initializeBrowser();
-    await initializePage();
-})
-
-After( async () => {
-    await closeBrowser();
-})
+After(async function () {
+  await cleanup();
+});
